@@ -54,10 +54,47 @@ class movie_crawler:
         tatalpage = int(totalpages[0][17:-1])
         return tatalpage
 
-    def getcontent(selg,url,session):
-        page = session.post(url)
+    def getcontent(selg,item,session):
+        infor = []
+        id = item[33:]
+        page = session.post(item)
         content = page.text
-        return content
+        soup = BeautifulSoup(content,'lxml')
+        title = soup.find('span',{"property":"v:itemreviewed"}).string
+        year = soup.find('span',{"class":"year"}).string[1:-1]
+        movieclass = soup.findAll('span',property="v:genre")
+        score = soup.find('strong',{"property":"v:average"}).string
+        try:
+            comments = soup.find('span',property="v:votes").string
+        except Exception:
+            comments = ''
+            pass
+        try:
+            time = soup.find('span',{"property":"v:runtime"}).string
+        except Exception:
+            time = 0
+            pass
+        classes = ''
+        for item in movieclass :
+            classes = item.string+" " + classes
+
+        try:
+            summary = soup.find('span',property="v:summary")
+            p = re.compile(r'<.+>')
+            summary = p.sub('',str(summary))
+            summary = summary.replace(' ','').strip().strip('\n')
+        except Exception:
+            summary = ' '
+            pass
+        infor.append(id)
+        infor.append(title)
+        infor.append(year)
+        infor.append(classes)
+        infor.append(time)
+        infor.append(score)
+        infor.append(comments)
+        infor.append(summary)
+        print(infor)
 crawler = movie_crawler()
 session =crawler.login()
 classlist = crawler.get_classlist(movie_class_url,session)
@@ -69,12 +106,11 @@ for item in taglist :
     for i in range(pagenumber):
         url = item + '?start=' + str(i*20) + '&type=T'
         movie_list = crawler.getmovielist(url,session)
-        movielist[-1:-1] = movie_list
+        movielist.extend(movie_list)
+       # movielist[-1:-1] = movie_list
     break
 totallist = list(set(movielist))
-content = crawler.getcontent(totallist[0],session)
-soup = BeautifulSoup(content,'lxml')
-#title = soup.h1
-title = soup.find('span',{"property":"v:itemreviewed"}).string
-year = soup.find('span',{"class":"year"}).string[1:-1]
-print(title)
+for item in totallist :
+    info = crawler.getcontent(item,session)
+    #break
+#print(time)
