@@ -77,4 +77,4 @@ soup = BeautifulSoup(content,'lxml')
 #title = soup.h1
 title = soup.find('span',{"property":"v:itemreviewed"}).string
 year = soup.find('span',{"class":"year"}).string[1:-1]
-print(year)
+print(title)
