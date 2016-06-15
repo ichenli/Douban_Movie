@@ -16,50 +16,48 @@ header = {
         }
 login_url = "https://accounts.douban.com/login"
 movie_class_url = 'https://movie.douban.com/tag/'
-data = {'form_email': '197294332@qq.com', 'form_password': 'chenli197294332'}
+data = {'form_email': 'youremail', 'form_password': 'yourpassword'}
 
 
 class movie_crawler:
-    def login(self):
+    def login(self):#登录
         session = requests.Session()
         session.post(login_url,data = data, headers = header)
         return session
 
-    def get_classlist(self,url,session):
+    def get_classlist(self,url,session):#获取电影类别
         content =[]
         classlist = []
         content =session.get(url).text
-        print(content)
-        print(url)
         class_list = re.findall(r"(\/tag\/)([\u4e00-\u9fa5]+)",content)
         print(len(class_list))
-        for i in range(34) :
+        for i in range(34) :#只爬取了前34个类别
             tag = class_list[i][1]
             classlist.append(tag)
         return classlist
 
-    def gettagurl(self,classlist):
+    def gettagurl(self,classlist):#获取每个类别的ul
         taglist = []
         for i in  range(len(classlist)) :
             tagurl = movie_class_url+classlist[i]
             taglist.append(tagurl)
         return taglist
 
-    def getmovielist(self,url,session):
+    def getmovielist(self,url,session):#获取电影的url
         movie_list = []
         page = session.get(url)
         content = page.text
         movie_list = re.findall(r'https://movie.douban.com/subject/[0-9]+',content)
         return movie_list
 
-    def getpagenumber(self,url,session):
+    def getpagenumber(self,url,session):#获取页数
         page = session.post(url)
         content = page.text
         totalpages = re.findall(r'data-total-page=\"[0-9]*\"',content)
         tatalpage = int(totalpages[0][17:-1])
         return tatalpage
 
-    def getcontent(selg,item,session):
+    def getcontent(selg,item,session):#获取网页内容
         infor = []
         id = int(item[33:])
         page = session.post(item)
@@ -104,7 +102,7 @@ class movie_crawler:
         #print(infor)
         return infor
 
-    def sqlconnect(self):
+    def sqlconnect(self):#连接数据库
         conn=pymysql.connect(host='localhost',user='root',passwd='chenli',\
                 db='mysql',port=3306,charset='utf8')
         cur = conn.cursor()
@@ -128,7 +126,7 @@ class movie_crawler:
         returnlist = [cur,conn]
         return returnlist
 
-    def sqlinsert(self,returnlist,infor):
+    def sqlinsert(self,returnlist,infor):#插入数据
         print(returnlist)
         print(infor)
         cur = returnlist[0]
@@ -161,7 +159,6 @@ movielist = []
 print('获取电影链接')
 for item in taglist :
     pagenumber = crawler.getpagenumber(item,session)
-    #pagenumber = 1
     for i in range(pagenumber):
         url = item + '?start=' + str(i*20) + '&type=T'
         movie_list = crawler.getmovielist(url,session)
@@ -169,8 +166,7 @@ for item in taglist :
         if pagenumber%10==0 :
             time.sleep(60)
         print(i)
-    #break
-totallist = list(set(movielist))
+totallist = list(set(movielist))#去掉重复的url
 print('连接数库')
 returnlist = crawler.sqlconnect()
 print('开始爬取')
@@ -183,5 +179,3 @@ for item in totallist :
     finally :
         pass
     print(infor[2]+'完成')
-    #break
-#crawler.sqlconnect(infor)
