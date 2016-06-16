@@ -16,7 +16,7 @@ header = {
         }
 login_url = "https://accounts.douban.com/login"
 movie_class_url = 'https://movie.douban.com/tag/'
-data = {'form_email': 'youremail', 'form_password': 'yourpassword'}
+data = {'form_email': '197294332@qq.com', 'form_password': 'chenli197294332'}
 
 
 class movie_crawler:
@@ -51,9 +51,11 @@ class movie_crawler:
         return movie_list
 
     def getpagenumber(self,url,session):#获取页数
+        url = str(url)
         page = session.post(url)
         content = page.text
         totalpages = re.findall(r'data-total-page=\"[0-9]*\"',content)
+        print(totalpages)
         tatalpage = int(totalpages[0][17:-1])
         return tatalpage
 
