@@ -16,7 +16,7 @@ header = {
         }
 login_url = "https://accounts.douban.com/login"
 movie_class_url = 'https://movie.douban.com/tag/'
-data = {'form_email': '197294332@qq.com', 'form_password': 'chenli197294332'}
+data = {'form_email': '94332@qq.com', 'form_password': '97294332'}
 
 
 class movie_crawler:
